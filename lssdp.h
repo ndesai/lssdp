@@ -31,6 +31,24 @@ typedef struct lssdp_nbr {
 #define LSSDP_INTERFACE_NAME_LEN    16                      // IFNAMSIZ
 #define LSSDP_INTERFACE_LIST_SIZE   16
 #define LSSDP_IP_LEN                16
+
+typedef struct lssdp_location_t {                                            // Location (optional):
+    char    prefix              [LSSDP_FIELD_LEN];  // Protocal: "https://" or "http://"
+    char    domain              [LSSDP_FIELD_LEN];  // if domain is empty, using Interface IP as default
+    char    suffix              [LSSDP_FIELD_LEN];  // URI or Port: "/index.html" or ":80"
+} lssdp_location;
+
+
+typedef struct lssdp_header_t {
+    /* SSDP Standard Header Fields */
+    char        search_target       [LSSDP_FIELD_LEN];  // Search Target
+    char        unique_service_name [LSSDP_FIELD_LEN];  // Unique Service Name: MAC or User Name
+    lssdp_location location;
+    /* Additional SSDP Header Fields */
+    char        sm_id       [LSSDP_FIELD_LEN];
+    char        device_type [LSSDP_FIELD_LEN];
+} lssdp_header;
+
 typedef struct lssdp_ctx {
     int             sock;                                   // SSDP socket
     unsigned short  port;                                   // SSDP port (0x0000 ~ 0xFFFF)
@@ -48,20 +66,7 @@ typedef struct lssdp_ctx {
     } interface[LSSDP_INTERFACE_LIST_SIZE];                 // interface[16]
 
     /* SSDP Header Fields */
-    struct {
-        /* SSDP Standard Header Fields */
-        char        search_target       [LSSDP_FIELD_LEN];  // Search Target
-        char        unique_service_name [LSSDP_FIELD_LEN];  // Unique Service Name: MAC or User Name
-        struct {                                            // Location (optional):
-            char    prefix              [LSSDP_FIELD_LEN];  // Protocal: "https://" or "http://"
-            char    domain              [LSSDP_FIELD_LEN];  // if domain is empty, using Interface IP as default
-            char    suffix              [LSSDP_FIELD_LEN];  // URI or Port: "/index.html" or ":80"
-        } location;
-
-        /* Additional SSDP Header Fields */
-        char        sm_id       [LSSDP_FIELD_LEN];
-        char        device_type [LSSDP_FIELD_LEN];
-    } header;
+    lssdp_header header;
 
     /* Callback Function */
     int (* network_interface_changed_callback) (struct lssdp_ctx * lssdp);
